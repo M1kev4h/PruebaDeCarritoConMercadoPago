@@ -1,5 +1,6 @@
-'use client'
+"use client";
 import { useState } from "react";
+import { createPreferece } from "../actions/preferences/action";
 
 type Product = {
   id: number;
@@ -7,7 +8,7 @@ type Product = {
   price: number;
 };
 
-type CartItem = {
+export type CartItem = {
   product: Product;
   quantity: number;
 };
@@ -18,36 +19,37 @@ const products: Product[] = [
   { id: 3, name: "Producto 3", price: 30 },
 ];
 
-const handleCheckout = async () => {
-  try {
-    const response = await fetch("/api/create-preference", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ Cart }), 
-    });
+// const handleCheckout = async (cart: CartItem[]) => {
+//   try {
+//     const response = await fetch("/api/create-preference", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ cart }),
+//     });
 
-    if (!response.ok) {
-      throw new Error("Error al procesar el pago");
-    }
+//     if (!response.ok) {
+//       throw new Error("Error al procesar el pago");
+//     }
 
-    const { init_point } = await response.json();
+//     const { init_point } = await response.json();
 
-    
-    window.location.href = init_point;
-  } catch (error) {
-    console.error("Error al procesar el pago:", error);
-    alert("Hubo un problema al procesar tu pago");
-  }
-};
+//     window.location.href = init_point;
+//   } catch (error) {
+//     console.error("Error al procesar el pago:", error);
+//     alert("Hubo un problema al procesar tu pago");
+//   }
+// };
 
-const Cart = () => {
+export const Cart = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
   const addToCart = (product: Product) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.product.id === product.id);
+      const existingItem = prevCart.find(
+        (item) => item.product.id === product.id
+      );
       if (existingItem) {
         return prevCart.map((item) =>
           item.product.id === product.id
@@ -73,7 +75,10 @@ const Cart = () => {
   };
 
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return cart.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0
+    );
   };
 
   return (
@@ -99,13 +104,21 @@ const Cart = () => {
       {cart.length === 0 ? (
         <p className="text-gray-600">El carrito está vacío.</p>
       ) : (
-        <div className="space-y-4">
+        <form
+          className="space-y-4"
+          action={async () => await createPreferece(cart)}
+        >
           {cart.map((item) => (
-            <div key={item.product.id} className="flex items-center justify-between">
+            <div
+              key={item.product.id}
+              className="flex items-center justify-between"
+            >
               <div>
                 <h3 className="text-lg font-semibold">{item.product.name}</h3>
                 <p className="text-gray-600">Cantidad: {item.quantity}</p>
-                <p className="text-gray-600">Subtotal: ${item.product.price * item.quantity}</p>
+                <p className="text-gray-600">
+                  Subtotal: ${item.product.price * item.quantity}
+                </p>
               </div>
               <div>
                 <button
@@ -117,17 +130,17 @@ const Cart = () => {
               </div>
             </div>
           ))}
-          <div className="text-right font-bold text-lg">Total: ${calculateTotal()}</div>
+          <div className="text-right font-bold text-lg">
+            Total: ${calculateTotal()}
+          </div>
           <button
+            type="submit"
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            onClick={handleCheckout}
           >
             Finalizar Compra
           </button>
-        </div>
+        </form>
       )}
     </div>
   );
 };
-
-export default Cart;
