@@ -1,10 +1,9 @@
-import React from 'react'
-import Cart from './components/Cart'
+import React from "react";
+import { Cart } from "./components/Cart";
+import { NextPage } from "next";
 
-function Index() {
-  return (
-    <Cart/>
-  )
-}
+const Index: NextPage = () => {
+  return <Cart />;
+};
 
-export default Index
+export default Index;
